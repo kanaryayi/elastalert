@@ -8,6 +8,7 @@ import subprocess
 import sys
 import time
 import warnings
+import yaml
 from email.mime.text import MIMEText
 from email.utils import formatdate
 from HTMLParser import HTMLParser
@@ -23,7 +24,6 @@ import stomp
 from exotel import Exotel
 from jira.client import JIRA
 from jira.exceptions import JIRAError
-from requests.auth import HTTPProxyAuth
 from requests.exceptions import RequestException
 from staticconf.loader import yaml_loader
 from texttable import Texttable
@@ -1105,8 +1105,6 @@ class SlackAlerter(Alerter):
         self.slack_proxy = self.rule.get('slack_proxy', None)
         self.slack_username_override = self.rule.get('slack_username_override', 'elastalert')
         self.slack_channel_override = self.rule.get('slack_channel_override', '')
-        if isinstance(self.slack_channel_override, basestring):
-            self.slack_channel_override = [self.slack_channel_override]
         self.slack_emoji_override = self.rule.get('slack_emoji_override', ':ghost:')
         self.slack_icon_url_override = self.rule.get('slack_icon_url_override', '')
         self.slack_msg_color = self.rule.get('slack_msg_color', 'danger')
@@ -1148,6 +1146,7 @@ class SlackAlerter(Alerter):
         proxies = {'https': self.slack_proxy} if self.slack_proxy else None
         payload = {
             'username': self.slack_username_override,
+            'channel': self.slack_channel_override,
             'parse': self.slack_parse_override,
             'text': self.slack_text_string,
             'attachments': [
@@ -1171,20 +1170,18 @@ class SlackAlerter(Alerter):
             payload['icon_emoji'] = self.slack_emoji_override
 
         for url in self.slack_webhook_url:
-            for channel_override in self.slack_channel_override:
-                try:
-                    if self.slack_ignore_ssl_errors:
-                        requests.packages.urllib3.disable_warnings()
-                    payload['channel'] = channel_override
-                    response = requests.post(
-                        url, data=json.dumps(payload, cls=DateTimeEncoder),
-                        headers=headers, verify=not self.slack_ignore_ssl_errors,
-                        proxies=proxies)
-                    warnings.resetwarnings()
-                    response.raise_for_status()
-                except RequestException as e:
-                    raise EAException("Error posting to slack: %s" % e)
-        elastalert_logger.info("Alert '%s' sent to Slack" % self.rule['name'])
+            try:
+                if self.slack_ignore_ssl_errors:
+                    requests.packages.urllib3.disable_warnings()
+                response = requests.post(
+                    url, data=json.dumps(payload, cls=DateTimeEncoder),
+                    headers=headers, verify=not self.slack_ignore_ssl_errors,
+                    proxies=proxies)
+                warnings.resetwarnings()
+                response.raise_for_status()
+            except RequestException as e:
+                raise EAException("Error posting to slack: %s" % e)
+        elastalert_logger.info("Alert sent to Slack")
 
     def get_info(self):
         return {'type': 'slack',
@@ -1403,8 +1400,6 @@ class TelegramAlerter(Alerter):
         self.telegram_api_url = self.rule.get('telegram_api_url', 'api.telegram.org')
         self.url = 'https://%s/bot%s/%s' % (self.telegram_api_url, self.telegram_bot_token, "sendMessage")
         self.telegram_proxy = self.rule.get('telegram_proxy', None)
-        self.telegram_proxy_login = self.rule.get('telegram_proxy_login', None)
-        self.telegram_proxy_password = self.rule.get('telegram_proxy_pass', None)
 
     def alert(self, matches):
         body = u'⚠ *%s* ⚠ ```\n' % (self.create_title(matches))
@@ -1420,7 +1415,6 @@ class TelegramAlerter(Alerter):
         headers = {'content-type': 'application/json'}
         # set https proxy, if it was provided
         proxies = {'https': self.telegram_proxy} if self.telegram_proxy else None
-        auth = HTTPProxyAuth(self.telegram_proxy_login,self.telegram_proxy_password) if self.telegram_proxy_login else None
         payload = {
             'chat_id': self.telegram_room_id,
             'text': body,
@@ -1429,7 +1423,7 @@ class TelegramAlerter(Alerter):
         }
 
         try:
-            response = requests.post(self.url, data=json.dumps(payload, cls=DateTimeEncoder), headers=headers, proxies=proxies, auth=auth)
+            response = requests.post(self.url, data=json.dumps(payload, cls=DateTimeEncoder), headers=headers, proxies=proxies)
             warnings.resetwarnings()
             response.raise_for_status()
         except RequestException as e:
@@ -1786,3 +1780,123 @@ class StrideAlerter(Alerter):
         return {'type': 'stride',
                 'stride_cloud_id': self.stride_cloud_id,
                 'stride_conversation_id': self.stride_conversation_id}
+
+
+class TestAlerter(Alerter):
+    """ Creates a Slack room message for each alert """
+    ##required_options = frozenset(['slack_webhook_url'])
+
+    def __init__(self, rule):
+        super(TestAlerter, self).__init__(rule)
+        ##self.slack_webhook_url = self.rule['slack_webhook_url']
+        ##if isinstance(self.slack_webhook_url, basestring):
+          ##  self.slack_webhook_url = [self.slack_webhook_url]
+        self.slack_webhook_url = list()
+        self.slack_proxy = self.rule.get('slack_proxy', None)
+        self.slack_username_override = self.rule.get('slack_username_override', 'elastalert')
+        self.slack_channel_override = self.rule.get('slack_channel_override', '')
+        self.slack_emoji_override = self.rule.get('slack_emoji_override', ':ghost:')
+        self.slack_icon_url_override = self.rule.get('slack_icon_url_override', '')
+        self.slack_msg_color = self.rule.get('slack_msg_color', 'danger')
+        self.slack_parse_override = self.rule.get('slack_parse_override', 'none')
+        self.slack_text_string = self.rule.get('slack_text_string', '')
+        self.slack_alert_fields = self.rule.get('slack_alert_fields', '')
+        self.slack_ignore_ssl_errors = self.rule.get('slack_ignore_ssl_errors', False)
+
+    def format_body(self, body):
+        # https://api.slack.com/docs/formatting
+        return body.encode('UTF-8')
+
+    def get_aggregation_summary_text__maximum_width(self):
+        width = super(TestAlerter, self).get_aggregation_summary_text__maximum_width()
+        # Reduced maximum width for prettier Slack display.
+        return min(width, 75)
+
+    def get_aggregation_summary_text(self, matches):
+        text = super(TestAlerter, self).get_aggregation_summary_text(matches)
+        if text:
+            text = u'```\n{0}```\n'.format(text)
+        return text
+
+    def populate_fields(self, matches):
+        alert_fields = []
+        for arg in self.slack_alert_fields:
+            arg = copy.copy(arg)
+            arg['value'] = lookup_es_key(matches[0], arg['value'])
+            alert_fields.append(arg)
+        return alert_fields
+
+    def alert(self, matches):
+        body = self.create_alert_body(matches)
+
+        body = self.format_body(body)
+        ##
+        webhooks = dict();
+        with open("elastalert/webhooks.yaml") as stream:
+            try:
+                webhooks = yaml.load(stream)
+            except yaml.YAMLError as e:
+                print e
+        ## This code block gets appname information from body
+        ## compares it with webhook.yaml appname information
+        ## for each webhook in each institute checks whether in use or not
+        app_keys = list(webhooks.keys())
+        for key in app_keys:
+            if ((body.split(" ")[0]) == key) :
+                webhook_size = len(webhooks[key])
+                for webhookNum in range(1,webhook_size+1):
+                    webhook = webhooks[key]["webhook" + str(webhookNum)]
+                    if(webhook["use"]):
+                        self.slack_webhook_url.append(webhooks[key]["webhook"+str(webhookNum)]["url"])
+              
+        ######
+        ######
+        # post to slack
+        headers = {'content-type': 'application/json'}
+        # set https proxy, if it was provided
+        proxies = {'https': self.slack_proxy} if self.slack_proxy else None
+        payload = {
+            'username': self.slack_username_override,
+            'channel': self.slack_channel_override,
+            'parse': self.slack_parse_override,
+            'text': self.slack_text_string,
+            'attachments': [
+                {
+                    'color': self.slack_msg_color,
+                    'title': self.create_title(matches),
+                    'text': body,
+                    'mrkdwn_in': ['text', 'pretext'],
+                    'fields': []
+                }
+            ]
+        }
+
+        # if we have defined fields, populate noteable fields for the alert
+        if self.slack_alert_fields != '':
+            payload['attachments'][0]['fields'] = self.populate_fields(matches)
+
+        if self.slack_icon_url_override != '':
+            payload['icon_url'] = self.slack_icon_url_override
+        else:
+            payload['icon_emoji'] = self.slack_emoji_override
+        #elastalert_logger.error(matches)
+
+        for url in self.slack_webhook_url:
+            try:
+                if self.slack_ignore_ssl_errors:
+                    requests.packages.urllib3.disable_warnings()
+                response = requests.post(
+                    url, data=json.dumps(payload, cls=DateTimeEncoder),
+                    headers=headers, verify=not self.slack_ignore_ssl_errors,
+                    proxies=proxies)
+                warnings.resetwarnings()
+                response.raise_for_status()
+            except RequestException as e:
+                raise EAException("Error posting to slack: %s" % e)
+
+        elastalert_logger.info("Alert sent to Slack")
+
+    def get_info(self):
+        return {'type': 'slack',
+                'slack_username_override': self.slack_username_override,
+                'slack_webhook_url': self.slack_webhook_url}

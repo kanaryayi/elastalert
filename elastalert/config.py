@@ -73,6 +73,9 @@ alerts_mapping = {
     'stride': alerts.StrideAlerter,
     'ms_teams': alerts.MsTeamsAlerter,
     'slack': alerts.SlackAlerter,
+
+    'test': alerts.TestAlerter,
+
     'pagerduty': alerts.PagerDutyAlerter,
     'exotel': alerts.ExotelAlerter,
     'twilio': alerts.TwilioAlerter,
@@ -99,6 +102,7 @@ def get_module(module_name):
     Returns object or raises EAException on error. """
     try:
         module_path, module_class = module_name.rsplit('.', 1)
+
         base_module = __import__(module_path, globals(), locals(), [module_class])
         module = getattr(base_module, module_class)
     except (ImportError, AttributeError, ValueError) as e:
@@ -113,9 +117,13 @@ def load_configuration(filename, conf, args=None):
     :param conf: The global configuration dictionary, used for populating defaults.
     :return: The rule configuration, a dictionary.
     """
+
     rule = load_rule_yaml(filename)
+
     load_options(rule, conf, filename, args)
+
     load_modules(rule, args)
+
     return rule
 
 
@@ -134,7 +142,7 @@ def load_rule_yaml(filename):
         # Special case for merging filters - if both files specify a filter merge (AND) them
         if 'filter' in rule and 'filter' in loaded:
             rule['filter'] = loaded['filter'] + rule['filter']
-
+            #ghşlfhgşlm
         loaded.update(rule)
         rule = loaded
         if 'import' in rule:
@@ -338,7 +346,6 @@ def load_modules(rule, args=None):
             raise EAException("Enhancement module %s not a subclass of BaseEnhancement" % (enhancement_name))
         match_enhancements.append(enhancement(rule))
     rule['match_enhancements'] = match_enhancements
-
     # Convert rule type into RuleType object
     if rule['type'] in rules_mapping:
         rule['type'] = rules_mapping[rule['type']]
@@ -349,7 +356,6 @@ def load_modules(rule, args=None):
 
     # Make sure we have required alert and type options
     reqs = rule['type'].required_options
-
     if reqs - frozenset(rule.keys()):
         raise EAException('Missing required option(s): %s' % (', '.join(reqs - frozenset(rule.keys()))))
     # Instantiate rule
@@ -361,7 +367,6 @@ def load_modules(rule, args=None):
     # In debug mode alerts are not actually sent so don't bother instantiating them
     if not args or not args.debug:
         rule['alert'] = load_alerts(rule, alert_field=rule['alert'])
-
 
 def isyaml(filename):
     return filename.endswith('.yaml') or filename.endswith('.yml')
@@ -407,8 +412,10 @@ def load_alerts(rule, alert_field):
         if not issubclass(alert_class, alerts.Alerter):
             raise EAException('Alert module %s is not a subclass of Alerter' % (alert))
         missing_options = (rule['type'].required_options | alert_class.required_options) - frozenset(alert_config or [])
+
         if missing_options:
             raise EAException('Missing required option(s): %s' % (', '.join(missing_options)))
+
         return alert_class(alert_config)
 
     try:
@@ -418,6 +425,7 @@ def load_alerts(rule, alert_field):
         alert_field = [normalize_config(x) for x in alert_field]
         alert_field = sorted(alert_field, key=lambda (a, b): alerts_order.get(a, 1))
         # Convert all alerts into Alerter objects
+
         alert_field = [create_alert(a, b) for a, b in alert_field]
 
     except (KeyError, EAException) as e:
@@ -482,6 +490,7 @@ def load_rules(args):
             if rule['name'] in names:
                 raise EAException('Duplicate rule named %s' % (rule['name']))
         except EAException as e:
+
             raise EAException('Error loading file %s: %s' % (rule_file, e))
 
         rules.append(rule)

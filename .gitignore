@@ -1,5 +1,8 @@
-config.yaml
+elastalert/webhooks.yaml
 .tox/
+*.swn
+*.swl
+*.swm
 .coverage
 .idea/*
 .cache/

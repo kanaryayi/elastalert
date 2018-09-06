@@ -239,6 +239,9 @@ properties:
   slack_text_string: {type: string}
   slack_ignore_ssl_errors: {type: boolean}
 
+  ##Test
+  test_text: {type: string}
+
   ### PagerDuty
   pagerduty_service_key: {type: string}
   pagerduty_client_name: {type: string}
