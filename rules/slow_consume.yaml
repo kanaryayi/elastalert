@@ -8,10 +8,6 @@
 # Elasticsearch port
 # es_port: 14900
 
-# (Required)
-# Index to search, wildcard supported
-index: logstash-*
-
 # (OptionaL) Connect with SSL to Elasticsearch
 #use_ssl: True
 
@@ -21,23 +17,23 @@ index: logstash-*
 
 # (Required)
 # Rule name, must be unique
-name: Example cardinality rule
+name: slow consume rule
 
 # (Required)
 # Type of alert.
 # the frequency rule type alerts when num_events events occur with timeframe time
-type: cardinality
+type: frequency
 
-# (Required, cardinality specific)
-# Count the number of unique values for this field
-cardinality_field: "Hostname"
-
-# (Required, frequency specific)
-# Alert when there less than 15 unique hostnames
-min_cardinality: 15
+# (Required)
+# Index to search, wildcard supported
+index: logstash-*
 
 # (Required, frequency specific)
-# The cardinality is defined as the number of unique values for the most recent 4 hours
+# Alert when this many documents matching the query occur within a timeframe
+num_events: 1
+
+# (Required, frequency specific)
+# num_events must occur within this amount of time to trigger an alert
 timeframe:
   hours: 4
 
@@ -45,16 +41,31 @@ timeframe:
 # A list of Elasticsearch filters used for find events
 # These filters are joined with AND and nested in a filtered query
 # For more info: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html
+
 filter:
-- term:
-    status: "active"
+- query:
+    query_string:
+      query: "level: ERROR and appname: ALERT"
 
 # (Required)
 # The alert is use when a match is found
 alert:
-- "email"
-
+- "Multi"
+Multi:
 # (required, email specific)
 # a list of email addresses to send alerts to
-email:
-- "elastalert@example.com"
+alert_subject: "{0} - {1}"
+alert_subject_args: 
+- appname
+- "@timestamp"
+  #- "@timestamp"
+  #- level
+alert_text: "{3} -> {0} , {1} 'ın {2}'ni yavaş tüketiyor."
+alert_text_args: 
+- consumer
+- producer
+- topic
+- appname
+alert_text_type: alert_text_only
+
+

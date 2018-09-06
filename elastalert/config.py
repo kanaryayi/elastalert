@@ -74,7 +74,7 @@ alerts_mapping = {
     'ms_teams': alerts.MsTeamsAlerter,
     'slack': alerts.SlackAlerter,
 
-    'test': alerts.TestAlerter,
+    'Multi': alerts.MultiAlerter,
 
     'pagerduty': alerts.PagerDutyAlerter,
     'exotel': alerts.ExotelAlerter,

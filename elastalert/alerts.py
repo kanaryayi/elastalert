@@ -1782,15 +1782,16 @@ class StrideAlerter(Alerter):
                 'stride_conversation_id': self.stride_conversation_id}
 
 
-class TestAlerter(Alerter):
+class MultiAlerter(Alerter):
     """ Creates a Slack room message for each alert """
     ##required_options = frozenset(['slack_webhook_url'])
 
     def __init__(self, rule):
-        super(TestAlerter, self).__init__(rule)
+        super(MultiAlerter, self).__init__(rule)
         ##self.slack_webhook_url = self.rule['slack_webhook_url']
         ##if isinstance(self.slack_webhook_url, basestring):
           ##  self.slack_webhook_url = [self.slack_webhook_url]
+        self.webhooks = dict();
         self.slack_webhook_url = list()
         self.slack_proxy = self.rule.get('slack_proxy', None)
         self.slack_username_override = self.rule.get('slack_username_override', 'elastalert')
@@ -1808,12 +1809,12 @@ class TestAlerter(Alerter):
         return body.encode('UTF-8')
 
     def get_aggregation_summary_text__maximum_width(self):
-        width = super(TestAlerter, self).get_aggregation_summary_text__maximum_width()
+        width = super(MultiAlerter, self).get_aggregation_summary_text__maximum_width()
         # Reduced maximum width for prettier Slack display.
         return min(width, 75)
 
     def get_aggregation_summary_text(self, matches):
-        text = super(TestAlerter, self).get_aggregation_summary_text(matches)
+        text = super(MultiAlerter, self).get_aggregation_summary_text(matches)
         if text:
             text = u'```\n{0}```\n'.format(text)
         return text
@@ -1831,24 +1832,29 @@ class TestAlerter(Alerter):
 
         body = self.format_body(body)
         ##
-        webhooks = dict();
+
         with open("elastalert/webhooks.yaml") as stream:
             try:
-                webhooks = yaml.load(stream)
+                self.webhooks = yaml.load(stream)
             except yaml.YAMLError as e:
                 print e
         ## This code block gets appname information from body
         ## compares it with webhook.yaml appname information
         ## for each webhook in each institute checks whether in use or not
-        app_keys = list(webhooks.keys())
+        app_keys = list(self.webhooks.keys())
         for key in app_keys:
-            if ((body.split(" ")[0]) == key) :
-                webhook_size = len(webhooks[key])
-                for webhookNum in range(1,webhook_size+1):
-                    webhook = webhooks[key]["webhook" + str(webhookNum)]
-                    if(webhook["use"]):
-                        self.slack_webhook_url.append(webhooks[key]["webhook"+str(webhookNum)]["url"])
-              
+            body_array = body.split(" ")
+            appname = body_array[0]
+            if appname == key :
+                self.add_webhooks(key)
+            elif appname == "ALERT":
+                consumer = body_array[2]
+                print consumer
+                self.add_webhooks(consumer)
+                producer = body_array[4]
+                print producer
+                self.add_webhooks(producer)
+
         ######
         ######
         # post to slack
@@ -1880,7 +1886,9 @@ class TestAlerter(Alerter):
         else:
             payload['icon_emoji'] = self.slack_emoji_override
         #elastalert_logger.error(matches)
+        #############################
 
+        #############################
         for url in self.slack_webhook_url:
             try:
                 if self.slack_ignore_ssl_errors:
@@ -1895,6 +1903,13 @@ class TestAlerter(Alerter):
                 raise EAException("Error posting to slack: %s" % e)
 
         elastalert_logger.info("Alert sent to Slack")
+    def add_webhooks(self,key):
+        print "key ",key
+        webhook_size = len(self.webhooks[key])
+        for webhookNum in range(1, webhook_size + 1):
+            webhook = self.webhooks[key]["webhook" + str(webhookNum)]
+            if (webhook["use"]):
+                self.slack_webhook_url.append(self.webhooks[key]["webhook" + str(webhookNum)]["url"])
 
     def get_info(self):
         return {'type': 'slack',
