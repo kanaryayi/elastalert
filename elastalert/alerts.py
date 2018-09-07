@@ -1791,7 +1791,7 @@ class MultiAlerter(Alerter):
         ##self.slack_webhook_url = self.rule['slack_webhook_url']
         ##if isinstance(self.slack_webhook_url, basestring):
           ##  self.slack_webhook_url = [self.slack_webhook_url]
-        self.webhooks = dict();
+        self.webhooks = dict()
         self.slack_webhook_url = list()
         self.slack_proxy = self.rule.get('slack_proxy', None)
         self.slack_username_override = self.rule.get('slack_username_override', 'elastalert')
@@ -1833,27 +1833,28 @@ class MultiAlerter(Alerter):
         body = self.format_body(body)
         ##
 
-        with open("elastalert/webhooks.yaml") as stream:
-            try:
-                self.webhooks = yaml.load(stream)
-            except yaml.YAMLError as e:
-                print e
+        self.webhooks=self.read_webhook("elastalert/webhooks.yaml")
+        microservices = self.read_webhook("microservices.yaml")
         ## This code block gets appname information from body
         ## compares it with webhook.yaml appname information
         ## for each webhook in each institute checks whether in use or not
         app_keys = list(self.webhooks.keys())
+        print matches[0]
         for key in app_keys:
-            body_array = body.split(" ")
-            appname = body_array[0]
+            field = matches[0]
+            appname = field["appname"]
+            print appname
             if appname == key :
                 self.add_webhooks(key)
-            elif appname == "ALERT":
-                consumer = body_array[2]
-                print consumer
-                self.add_webhooks(consumer)
-                producer = body_array[4]
-                print producer
-                self.add_webhooks(producer)
+                if appname == "ALERT":
+                    print microservices
+                    print field["consumer"]
+                    consumer = microservices[field["consumer"]]
+                    print consumer
+                    self.add_webhooks(consumer)
+                    producer = microservices[field["producer"]]
+                    print producer
+                    self.add_webhooks(producer)
 
         ######
         ######
@@ -1903,6 +1904,14 @@ class MultiAlerter(Alerter):
                 raise EAException("Error posting to slack: %s" % e)
 
         elastalert_logger.info("Alert sent to Slack")
+
+    def read_webhook(self, file):
+        with open(file) as stream:
+            try:
+                return yaml.load(stream)
+            except yaml.YAMLError as e:
+                print e
+
     def add_webhooks(self,key):
         print "key ",key
         webhook_size = len(self.webhooks[key])

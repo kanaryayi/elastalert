@@ -60,12 +60,11 @@ alert_subject_args:
 - "@timestamp"
   #- "@timestamp"
   #- level
-alert_text: "{3} -> {0} , {1} 'ın {2}'ni yavaş tüketiyor."
+alert_text: "{0} , {1} 'ın {2}'ni yavaş tüketiyor."
 alert_text_args: 
 - consumer
 - producer
 - topic
-- appname
 alert_text_type: alert_text_only
 
 
