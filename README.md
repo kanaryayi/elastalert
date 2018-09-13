@@ -16,7 +16,7 @@ Elastalert ile:
 - PagerDuty
 - Exotel
 - Twilio
-- Gitter ortamlarına filtreleyerek istediğiniz bildirimi attırtabilirsiniz.
+- Gitter ortamlarına istediğiniz bildirimi attırtabilirsiniz.
 
 ### ElasticStack'ten Bildirim Atmak
 
