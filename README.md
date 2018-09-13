@@ -32,7 +32,7 @@ python elastalert/elastalert.py --rule rule/rule.yaml --config config.yaml
 ``` 
 4. İsterseniz parametre olarak --start [time] --end [time] verebilirsiniz. Ayrıca --debug ile hataları görüp --verbose ile detayları görebilirsiniz. --verbose ve --debug parametrelerini bir arada kullanmayınız ve -- debug ile alert gönderemeyeceğinizi unutmayınız.
 5. Eğer parametre olarak birden çok rule çalıştırmak isterseniz. 'Config.yaml' dosyasından rules file yerine bir dizin girmeniz gerek ve çalıştırmak istediğiniz rule'ları oraya atmalısınız.
-6. rule kurallarının ayrıntıları için aşağıdanki kaynaktan veya [documentation](http://elastalert.readthedocs.org) 'dan yararlanabilirsiniz.
+6. rule kurallarının ayrıntıları için aşağıdaki kaynaktan veya [documentation](http://elastalert.readthedocs.org) 'dan yararlanabilirsiniz.
 
 
 
