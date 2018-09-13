@@ -1,6 +1,23 @@
-# ElastAlert basit kurulumu ve çalıştırılması
+# ElastAlert tanımı, basit kurulumu ve çalıştırılması
 
 ### Elastic `X-Pack` alternatifi
+Elastalert, ElasticStack'te topladığınız loglarınızı gözlemleyerek, otomatik olarak alışılmadık veya istediğiniz bir durumda uyarmasını sağlayan bir projedir.
+Elastalert ile:
+- Email
+- JIRA
+- OpsGenie
+- Commands
+- HipChat
+- MS Teams
+- Slack
+- Telegram
+- AWS SNS
+- VictorOps
+- PagerDuty
+- Exotel
+- Twilio
+- Gitter ortamlarına filtreleyerek istediğiniz bildirimi attırtabilirsiniz.
+
 ### ElasticStack'ten Bildirim Atmak
 
 1. Bu repositoryi klonlamak ve dizin içinde gösterilen komutu uygulamak;
