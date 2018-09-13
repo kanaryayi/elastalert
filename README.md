@@ -1,6 +1,6 @@
 # ElastAlert kurulumu ve çalıştırılması
 
-### Elastic (X-Pack) alternatifi
+### Elastic 'X-Pack' alternatifi
 
 ### ElasticStack Bildirim Atmak
 
