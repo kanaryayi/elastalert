@@ -1,7 +1,7 @@
 # ElastAlert tanımı, basit kurulumu ve çalıştırılması
 
 ### Elastic `X-Pack` alternatifi
-Elastalert, ElasticStack'te topladığınız loglarınızı gözlemleyerek, otomatik olarak alışılmadık veya istediğiniz bir durumda uyarmasını sağlayan bir projedir.
+Elastalert, ElasticStack'te topladığınız loglarınızı gözlemleyerek, otomatik olarak alışılmadık veya istediğiniz bir durumda uyarmasını sağlayan bir projedir. Yelp şirketi tarafından geliştirilmiştir.
 Elastalert ile:
 - Email
 - JIRA
