@@ -1,8 +1,8 @@
-#ElastAlert kurulumu ve çalıştırılması
+# ElastAlert kurulumu ve çalıştırılması
 
-###Elastic (X-Pack) alternatifi
+### Elastic (X-Pack) alternatifi
 
-###ElasticStack Bildirim Atmak
+### ElasticStack Bildirim Atmak
 
 1. Bu repositoryi klonlamak ve dizin içinde gösterilen komutu uygulamak;
 ```bash
