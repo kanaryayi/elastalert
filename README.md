@@ -1,8 +1,7 @@
-# ElastAlert kurulumu ve çalıştırılması
+# ElastAlert basit kurulumu ve çalıştırılması
 
 ### Elastic `X-Pack` alternatifi
-
-### ElasticStack Bildirim Atmak
+### ElasticStack'ten Bildirim Atmak
 
 1. Bu repositoryi klonlamak ve dizin içinde gösterilen komutu uygulamak;
 ```bash
@@ -17,6 +16,7 @@ python elastalert/elastalert.py --rule rule/rule.yaml --config config.yaml
 4. İsterseniz parametre olarak --start [time] --end [time] verebilirsiniz. Ayrıca --debug ile hataları görüp --verbose ile detayları görebilirsiniz. --verbose ve --debug parametrelerini bir arada kullanmayınız ve -- debug ile alert gönderemeyeceğinizi unutmayınız.
 5. Eğer parametre olarak birden çok rule çalıştırmak isterseniz. 'Config.yaml' dosyasından rules file yerine bir dizin girmeniz gerek ve çalıştırmak istediğiniz rule'ları oraya atmalısınız.
 6. rule kurallarının ayrıntıları için [documentation](http://elastalert.readthedocs.org).
+
 
 
 [![Stories in Ready](https://badge.waffle.io/Yelp/elastalert.png?label=ready&title=Ready)](https://waffle.io/Yelp/elastalert)
