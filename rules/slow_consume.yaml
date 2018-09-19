@@ -41,11 +41,14 @@ timeframe:
 # A list of Elasticsearch filters used for find events
 # These filters are joined with AND and nested in a filtered query
 # For more info: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html
+ 
+realert:
+ minutes: 5
 
 filter:
 - query:
     query_string:
-      query: "level: ERROR and appname: ALERT"
+      query: "level: ERROR AND appname: ALERT"
 
 # (Required)
 # The alert is use when a match is found

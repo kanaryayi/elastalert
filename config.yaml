@@ -17,7 +17,7 @@ run_every:
 # ElastAlert will buffer results from the most recent
 # period of time, in case some log sources are not in real time
 buffer_time:
-  minutes: 1
+  minutes: 5
 
 # Optional URL prefix for elasticsearch
 #es_url_prefix: elasticsearch
@@ -46,4 +46,4 @@ writeback_index: elastalert_status
 # If an alert fails for some reason, ElastAlert will retry
 # sending the alert until this time period has elapsed
 alert_time_limit:
-  days: 2
+  days: 4

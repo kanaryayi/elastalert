@@ -45,7 +45,7 @@ timeframe:
 filter:
 - query:
     query_string:
-      query: "level: ERROR and appname: WSMALIYE"
+      query: "level: ERROR AND appname: WSMALIYE"
 
 # (Required)
 # The alert is use when a match is found

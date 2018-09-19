@@ -1834,7 +1834,7 @@ class MultiAlerter(Alerter):
         ##
 
         self.webhooks=self.read_webhook("elastalert/webhooks.yaml")
-        microservices = self.read_webhook("microservices.yaml")
+        
         ## This code block gets appname information from body
         ## compares it with webhook.yaml appname information
         ## for each webhook in each institute checks whether in use or not
@@ -1843,17 +1843,17 @@ class MultiAlerter(Alerter):
         for key in app_keys:
             field = matches[0]
             appname = field["appname"]
-            print appname
             if appname == key :
-                self.add_webhooks(key)
+                print appname
+                self.add_webhooks(appname)
                 if appname == "ALERT":
-                    print microservices
+                    
                     print field["consumer"]
-                    consumer = microservices[field["consumer"]]
-                    print consumer
+                    consumer = field["consumer"]
+                    print "consumer :",consumer
                     self.add_webhooks(consumer)
-                    producer = microservices[field["producer"]]
-                    print producer
+                    producer = field["producer"]
+                    print "producer :",producer
                     self.add_webhooks(producer)
 
         ######
@@ -1891,6 +1891,7 @@ class MultiAlerter(Alerter):
 
         #############################
         for url in self.slack_webhook_url:
+            print "webhook : ",url
             try:
                 if self.slack_ignore_ssl_errors:
                     requests.packages.urllib3.disable_warnings()
@@ -1904,6 +1905,7 @@ class MultiAlerter(Alerter):
                 raise EAException("Error posting to slack: %s" % e)
 
         elastalert_logger.info("Alert sent to Slack")
+        del self.slack_webhook_url[:]
 
     def read_webhook(self, file):
         with open(file) as stream:
