@@ -1,3 +1,41 @@
+# ElastAlert tanımı, basit kurulumu ve çalıştırılması
+
+### Elastic `X-Pack` alternatifi
+Elastalert, ElasticStack'te topladığınız loglarınızı gözlemleyerek, otomatik olarak alışılmadık veya istediğiniz bir durumda uyarmasını sağlayan bir projedir. Yelp şirketi tarafından geliştirilmiştir.
+Elastalert ile:
+- Email
+- JIRA
+- OpsGenie
+- Commands
+- HipChat
+- MS Teams
+- Slack
+- Telegram
+- AWS SNS
+- VictorOps
+- PagerDuty
+- Exotel
+- Twilio
+- Gitter ortamlarına istediğiniz bildirimi attırtabilirsiniz.
+
+### ElasticStack'ten Bildirim Atmak
+
+1. Bu repositoryi klonlamak ve dizin içinde gösterilen komutu uygulamak;
+```bash
+elastalert-create-index
+```
+    Bu komut (ElasticSearch)'ün içinde elastalerte özel index oluşturmamızı sağlayacak.
+2. Elastalert dizini içinde belli bir ‘config.yaml’ ile yeni bir 'rules' dizini içinde bir 'rule.yaml' oluşturmalıyız. 'rule.yaml' dosyasını belli rule ve config örnekleri doğrultusunda oluştururuz. Örnekleri, 'example_rule' dosyasında ve 'example_config' dosyasını dizinlerde bulabilirsiniz.
+3. Elastalerti spesifik bir rule dosyasına göre python process olarak çalıştırmak için komut;
+```bash
+python elastalert/elastalert.py --rule rule/rule.yaml --config config.yaml
+``` 
+4. İsterseniz parametre olarak --start [time] --end [time] verebilirsiniz. Ayrıca --debug ile hataları görüp --verbose ile detayları görebilirsiniz. --verbose ve --debug parametrelerini bir arada kullanmayınız ve -- debug ile alert gönderemeyeceğinizi unutmayınız.
+5. Eğer parametre olarak birden çok rule çalıştırmak isterseniz. 'Config.yaml' dosyasından rules file yerine bir dizin girmeniz gerek ve çalıştırmak istediğiniz rule'ları oraya atmalısınız.
+6. rule kurallarının ayrıntıları için aşağıdaki kaynaktan veya [documentation](http://elastalert.readthedocs.org) 'dan yararlanabilirsiniz.
+
+
+
 [![Stories in Ready](https://badge.waffle.io/Yelp/elastalert.png?label=ready&title=Ready)](https://waffle.io/Yelp/elastalert)
 [![Stories in In Progress](https://badge.waffle.io/Yelp/elastalert.png?label=in%20progress&title=In%20Progress)](https://waffle.io/Yelp/elastalert)
 [![Build Status](https://travis-ci.org/Yelp/elastalert.svg)](https://travis-ci.org/Yelp/elastalert)
