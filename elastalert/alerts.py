@@ -1845,9 +1845,10 @@ class MultiAlerter(Alerter):
             appname = field["appname"]
             if appname == key :
                 print appname
+
                 self.add_webhooks(appname)
                 if appname == "ALERT":
-                    
+                    print field["@timestamp"]
                     print field["consumer"]
                     consumer = field["consumer"]
                     print "consumer :",consumer

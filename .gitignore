@@ -1,6 +1,6 @@
 elastalert/webhooks.yaml
 .tox/
-*.swn
+*.sw*
 *.swl
 *.swm
 .coverage

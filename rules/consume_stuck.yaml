@@ -42,6 +42,9 @@ timeframe:
 # These filters are joined with AND and nested in a filtered query
 # For more info: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html
 
+realert:
+ minutes: 2
+
 filter:
 - query:
     query_string:
@@ -67,4 +70,6 @@ alert_text_args:
 - topic
 alert_text_type: alert_text_only
 
-
+aggregation:
+ minutes: 2
+aggregate_by_match_time: true

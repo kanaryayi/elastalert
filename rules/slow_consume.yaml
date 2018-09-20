@@ -41,9 +41,9 @@ timeframe:
 # A list of Elasticsearch filters used for find events
 # These filters are joined with AND and nested in a filtered query
 # For more info: http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/query-dsl.html
- 
-realert:
- minutes: 5
+
+#timestamp_format:
+
 
 filter:
 - query:
@@ -69,5 +69,8 @@ alert_text_args:
 - producer
 - topic
 alert_text_type: alert_text_only
-
-
+aggregation:
+ minutes: 2
+aggregate_by_match_time: true
+realert:
+ minutes: 2
